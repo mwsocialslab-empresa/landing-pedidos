@@ -27,7 +27,7 @@ fetch(URL_SHEETS)
         });
 
         contenedor.innerHTML += `
-          <div class="col-lg-3 col-md-4 col-sm-6 producto" data-categoria="${categoria}">
+          <div class="col-6 col-md-4 col-lg-3 producto"" data-categoria="${categoria}">
             <div class="card h-100 text-center shadow-sm">
               <div class="card-body">
 
