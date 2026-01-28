@@ -1,53 +1,66 @@
-const URL_SHEETS = "https://script.google.com/macros/s/AKfycbwSDIRtp2ZgUrTUlzylS2ee3M_kNyYtyY2yW_NQl-OtOHDLBpqmYRV6KnARvHgLYDv-/exec";
+const URL_SHEETS = "https://script.google.com/macros/s/AKfycbzYZXizwOl7VWgxjTU7LeFzg91HuS8Fh1o4aDDRw4mWjCd8Q4xzRMewc1yNzRkb_PyL_g/exec";
 
 let carrito = [];
 let total = 0;
+let productos = [];
 
-// CARGAR PRODUCTOS
+// 🧾 CARGAR PRODUCTOS
 fetch(URL_SHEETS)
   .then(res => res.json())
   .then(data => {
     const contenedor = document.getElementById("productos");
+    let index = 0;
 
-    data.forEach((p, i) => {
-      const precio = p.oferta > 0 ? p.oferta : p.precio;
+    for (const categoria in data) {
+      data[categoria].forEach(p => {
+        const precio = Number(p.oferta) > 0 ? Number(p.oferta) : Number(p.precio);
 
-      contenedor.innerHTML += `
-        <div class="col-md-4">
-          <div class="card h-100 text-center shadow-sm">
-            <div class="card-body">
-              <h5>${p.nombre}</h5>
-              <p class="text-success fw-bold">$${precio} / ${p.unidad}</p>
+        productos.push({
+          nombre: p.nombre,
+          precio,
+          unidad: p.unidad
+        });
 
-              <div class="input-group mb-2">
-                <button class="btn btn-outline-secondary"
-                  onclick="cambiarCantidad(${i}, -0.5)">−</button>
+        contenedor.innerHTML += `
+          <div class="col-md-4 producto" data-categoria="${categoria}">
+            <div class="card h-100 text-center shadow-sm">
+              <div class="card-body">
 
-                <input type="number"
-                       class="form-control text-center"
-                       id="cant${i}"
-                       value="0"
-                       readonly>
+                <h5>${p.nombre}</h5>
+                <p class="text-success fw-bold">$${precio} / ${p.unidad}</p>
 
-                <button class="btn btn-outline-secondary"
-                  onclick="cambiarCantidad(${i}, 0.5)">+</button>
+                <div class="input-group mb-2">
+                  <button class="btn btn-outline-secondary"
+                    onclick="cambiarCantidad(${index}, -0.5)">−</button>
+
+                  <input type="number"
+                    class="form-control text-center"
+                    id="cant${index}"
+                    value="0"
+                    readonly>
+
+                  <span class="input-group-text">kg</span>
+
+                  <button class="btn btn-outline-secondary"
+                    onclick="cambiarCantidad(${index}, 0.5)">+</button>
+                </div>
+
+
+                <p>Subtotal: $<span id="sub${index}">0</span></p>
+
+                <button class="btn btn-success w-100"
+                  onclick="agregar(${index})">
+                  Agregar
+                </button>
+
               </div>
-
-              <p>Subtotal: $<span id="sub${i}">0</span></p>
-
-              <button class="btn btn-success w-100"
-                onclick="agregar(${i}, '${p.nombre}', ${precio})">
-                Agregar
-              </button>
             </div>
           </div>
-        </div>
-      `;
-    });
+        `;
+        index++;
+      });
+    }
   });
-
-
-// ➕➖ CAMBIAR CANTIDAD
 function cambiarCantidad(i, valor) {
   const input = document.getElementById(`cant${i}`);
   let cantidad = parseFloat(input.value) || 0;
@@ -57,48 +70,54 @@ function cambiarCantidad(i, valor) {
 
   input.value = cantidad.toFixed(1);
 
-  const precio = document
-    .querySelectorAll(".card")[i]
-    .querySelector(".text-success")
-    .innerText
-    .replace("$", "")
-    .split(" ")[0];
-
+  const precio = productos[i].precio;
   document.getElementById(`sub${i}`).innerText =
     (cantidad * precio).toFixed(2);
 }
+function agregar(i) {
+  const input = document.getElementById(`cant${i}`);
+  const cant = parseFloat(input.value);
 
-
-// 🛒 AGREGAR AL CARRITO
-function agregar(i, nombre, precio) {
-  const cant = parseFloat(document.getElementById(`cant${i}`).value);
+  // Si no eligió cantidad, no hace nada
   if (!cant || cant <= 0) return;
 
-  const existente = carrito.find(p => p.nombre === nombre);
+  const producto = productos[i];
+
+  const existente = carrito.find(p => p.nombre === producto.nombre);
 
   if (existente) {
     existente.cantidad += cant;
   } else {
-    carrito.push({ nombre, precio, cantidad: cant });
+    carrito.push({
+      nombre: producto.nombre,
+      precio: producto.precio,
+      cantidad: cant
+    });
   }
 
-  total += precio * cant;
+  total += producto.precio * cant;
   actualizarCarrito();
+
+  // ✅ RESETEAR CAMPOS (ESTO ES LO IMPORTANTE)
+  input.value = "0";
+  document.getElementById(`sub${i}`).innerText = "0";
 }
 
-
-// 🧾 MOSTRAR CARRITO
 function actualizarCarrito() {
   const lista = document.getElementById("lista");
   const btnVaciar = document.getElementById("btnVaciar");
 
   lista.innerHTML = "";
+  total = 0;
 
   carrito.forEach((p, i) => {
+    const subtotal = p.precio * p.cantidad;
+    total += subtotal;
+
     lista.innerHTML += `
-      <div class="d-flex justify-content-between mb-2">
+      <div class="d-flex justify-content-between align-items-center mb-2">
         <span>${p.cantidad}kg ${p.nombre}</span>
-        <span>$${(p.precio * p.cantidad).toFixed(2)}</span>
+        <span>$${subtotal.toFixed(2)}</span>
         <button class="btn btn-sm btn-danger" onclick="eliminar(${i})">✕</button>
       </div>
     `;
@@ -107,27 +126,17 @@ function actualizarCarrito() {
   document.getElementById("total").innerText = total.toFixed(2);
   btnVaciar.style.display = carrito.length ? "block" : "none";
 }
-
-
-// ❌ ELIMINAR
 function eliminar(i) {
-  total -= carrito[i].precio * carrito[i].cantidad;
   carrito.splice(i, 1);
   actualizarCarrito();
 }
-
-
-// 🗑 VACIAR
 function vaciarCarrito() {
   carrito = [];
   total = 0;
   actualizarCarrito();
 }
-
-
-// 📲 WHATSAPP
 function enviarPedidoWhatsApp() {
-  if (!carrito.length) return;
+  if (carrito.length === 0) return;
 
   const direccion = document.getElementById("direccion").value.trim();
 
@@ -152,5 +161,3 @@ function enviarPedidoWhatsApp() {
     `https://wa.me/5491127461954?text=${encodeURIComponent(msg)}`
   );
 }
-
-
