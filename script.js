@@ -1,4 +1,4 @@
-const URL_SHEETS = "https://script.google.com/macros/s/AKfycbz_5urxfhMWvV8ojLie3fRVE7TP-hKZmaQmQYNuZCOTug6oTdX341chGN4ow9QPbsdmYQ/exec";
+const URL_SHEETS = "https://script.google.com/macros/s/AKfycbwb9EhIdBKP2Jqoo1BnYF35cUg304CzvLQzpS0BG1tCqFJ8fCowHLyfgMk_QWZb0jg9Sg/exec";
 
 let carrito = [];
 let productos = [];
@@ -10,7 +10,6 @@ let total = 0;
 fetch(URL_SHEETS)
   .then(r => r.json())
   .then(data => {
-    console.log("RESPUESTA:", data);
 
     const contenedor = document.getElementById("productos");
     let index = 0;
@@ -34,7 +33,13 @@ fetch(URL_SHEETS)
           <div class="col-12 col-md-4 col-lg-3 producto"
                data-categoria="${categoria}"
                data-oferta="${esOferta}">
-            <div class="card h-100 shadow-sm text-center">
+            <div class="card h-100 shadow-sm text-center position-relative">
+
+              ${esOferta ? `
+                <span class="badge bg-danger position-absolute top-0 end-0 m-2">
+                  OFERTA
+                </span>` : ""}
+
               <div class="card-body">
 
                 <h5>${p.nombre}</h5>
@@ -102,7 +107,6 @@ function cambiarCantidad(i, valor) {
 function agregar(i) {
   const input = document.getElementById(`cant${i}`);
   const cant = parseFloat(input.value);
-
   if (!cant || cant <= 0) return;
 
   const prod = productos[i];
@@ -198,4 +202,23 @@ function enviarPedidoWhatsApp() {
   window.open(
     `https://wa.me/5491127461954?text=${encodeURIComponent(msg)}`
   );
+}
+// ========================
+// MERCADO PAGO
+// ========================
+function pagarMP() {
+  const totalTexto = total.toFixed(2);
+
+  const alias = "walter30mp";
+
+  const link = `https://www.mercadopago.com.ar/home?alias=${alias}`;
+
+  alert(
+    "Se abrirá Mercado Pago.\n\n" +
+    "👉 Alias: " + alias + "\n" +
+    "💰 Total a pagar: $" + totalTexto + "\n\n" +
+    "Pegá el monto manualmente."
+  );
+
+  window.open(link, "_blank");
 }
