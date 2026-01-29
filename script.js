@@ -1,43 +1,56 @@
-
-// 🧾 CARGAR PRODUCTOS
-const URL_SHEETS = "https://script.google.com/macros/s/AKfycbzYZXizwOl7VWgxjTU7LeFzg91HuS8Fh1o4aDDRw4mWjCd8Q4xzRMewc1yNzRkb_PyL_g/exec";
+const URL_SHEETS = "https://script.google.com/macros/s/AKfycbz_5urxfhMWvV8ojLie3fRVE7TP-hKZmaQmQYNuZCOTug6oTdX341chGN4ow9QPbsdmYQ/exec";
 
 let carrito = [];
-let total = 0;
 let productos = [];
+let total = 0;
 
-// 🧾 CARGAR PRODUCTOS
+// ========================
+// CARGA DE PRODUCTOS
+// ========================
 fetch(URL_SHEETS)
-  .then(res => res.json())
+  .then(r => r.json())
   .then(data => {
+    console.log("RESPUESTA:", data);
+
     const contenedor = document.getElementById("productos");
     let index = 0;
 
     for (const categoria in data) {
       data[categoria].forEach(p => {
 
+        const esOferta = categoria === "ofertas";
         const precioOriginal = Number(p.precio);
-        const precioFinal = Number(p.oferta) > 0 ? Number(p.oferta) : precioOriginal;
+        const precioFinal = p.oferta > 0 ? Number(p.oferta) : precioOriginal;
 
         productos.push({
           nombre: p.nombre,
           precio: precioFinal,
-          precioOriginal: precioOriginal,
-          unidad: p.unidad
+          precioOriginal,
+          unidad: p.unidad,
+          esOferta
         });
 
         contenedor.innerHTML += `
-          <div class="col-6 col-md-4 col-lg-3 producto"" data-categoria="${categoria}">
-            <div class="card h-100 text-center shadow-sm">
+          <div class="col-12 col-md-4 col-lg-3 producto"
+               data-categoria="${categoria}"
+               data-oferta="${esOferta}">
+            <div class="card h-100 shadow-sm text-center">
               <div class="card-body">
 
                 <h5>${p.nombre}</h5>
 
-                <p class="text-success fw-bold">
-                  $${precioFinal} / ${p.unidad}
-                </p>
+                ${
+                  esOferta
+                    ? `<p class="mb-1">
+                        <span class="text-muted text-decoration-line-through">$${precioOriginal}</span>
+                        <span class="text-danger fw-bold fs-5 ms-2">$${precioFinal}</span>
+                      </p>`
+                    : `<p class="fw-bold text-success">$${precioFinal}</p>`
+                }
 
-                <div class="input-group mb-2">
+                <small class="text-muted">x ${p.unidad}</small>
+
+                <div class="input-group my-2">
                   <button class="btn btn-outline-secondary"
                     onclick="cambiarCantidad(${index}, -0.5)">−</button>
 
@@ -45,7 +58,7 @@ fetch(URL_SHEETS)
                     class="form-control text-center"
                     id="cant${index}"
                     value="0"
-                    readonly></input>
+                    readonly>
 
                   <span class="input-group-text">kg</span>
 
@@ -59,7 +72,6 @@ fetch(URL_SHEETS)
                   onclick="agregar(${index})">
                   Agregar
                 </button>
-
               </div>
             </div>
           </div>
@@ -69,46 +81,46 @@ fetch(URL_SHEETS)
     }
   });
 
+// ========================
+// CANTIDAD
+// ========================
 function cambiarCantidad(i, valor) {
   const input = document.getElementById(`cant${i}`);
-  let cantidad = parseFloat(input.value) || 0;
+  let cant = parseFloat(input.value) || 0;
 
-  cantidad += valor;
-  if (cantidad < 0) cantidad = 0;
+  cant += valor;
+  if (cant < 0) cant = 0;
 
-  input.value = cantidad.toFixed(1);
-
-  const precio = productos[i].precio;
+  input.value = cant.toFixed(1);
   document.getElementById(`sub${i}`).innerText =
-    (cantidad * precio).toFixed(2);
+    (cant * productos[i].precio).toFixed(2);
 }
+
+// ========================
+// CARRITO
+// ========================
 function agregar(i) {
   const input = document.getElementById(`cant${i}`);
   const cant = parseFloat(input.value);
 
-  // Si no eligió cantidad, no hace nada
   if (!cant || cant <= 0) return;
 
-  const producto = productos[i];
+  const prod = productos[i];
+  const existe = carrito.find(p => p.nombre === prod.nombre);
 
-  const existente = carrito.find(p => p.nombre === producto.nombre);
-
-  if (existente) {
-    existente.cantidad += cant;
+  if (existe) {
+    existe.cantidad += cant;
   } else {
     carrito.push({
-      nombre: producto.nombre,
-      precio: producto.precio,
+      nombre: prod.nombre,
+      precio: prod.precio,
       cantidad: cant
     });
   }
 
-  total += producto.precio * cant;
-  actualizarCarrito();
-
-  // ✅ RESETEAR CAMPOS (ESTO ES LO IMPORTANTE)
-  input.value = "0";
+  input.value = 0;
   document.getElementById(`sub${i}`).innerText = "0";
+  actualizarCarrito();
 }
 
 function actualizarCarrito() {
@@ -119,13 +131,13 @@ function actualizarCarrito() {
   total = 0;
 
   carrito.forEach((p, i) => {
-    const subtotal = p.precio * p.cantidad;
-    total += subtotal;
+    const sub = p.precio * p.cantidad;
+    total += sub;
 
     lista.innerHTML += `
-      <div class="d-flex justify-content-between align-items-center mb-2">
+      <div class="d-flex justify-content-between mb-2">
         <span>${p.cantidad}kg ${p.nombre}</span>
-        <span>$${subtotal.toFixed(2)}</span>
+        <span>$${sub.toFixed(2)}</span>
         <button class="btn btn-sm btn-danger" onclick="eliminar(${i})">✕</button>
       </div>
     `;
@@ -134,59 +146,56 @@ function actualizarCarrito() {
   document.getElementById("total").innerText = total.toFixed(2);
   btnVaciar.style.display = carrito.length ? "block" : "none";
 }
+
 function eliminar(i) {
   carrito.splice(i, 1);
   actualizarCarrito();
 }
+
 function vaciarCarrito() {
   carrito = [];
-  total = 0;
   actualizarCarrito();
 }
+
+// ========================
+// FILTRO
+// ========================
+function filtrar(cat) {
+  document.querySelectorAll(".producto").forEach(p => {
+    if (cat === "todos") {
+      p.style.display = "block";
+    } else if (cat === "ofertas") {
+      p.style.display = p.dataset.oferta === "true" ? "block" : "none";
+    } else {
+      p.style.display =
+        p.dataset.categoria === cat ? "block" : "none";
+    }
+  });
+}
+
+// ========================
+// WHATSAPP
+// ========================
 function enviarPedidoWhatsApp() {
-  if (carrito.length === 0) return;
+  if (!carrito.length) return;
 
-  const direccion = document.getElementById("direccion").value.trim();
-
-  if (!direccion) {
-    const modal = new bootstrap.Modal(
+  const dir = document.getElementById("direccion").value.trim();
+  if (!dir) {
+    new bootstrap.Modal(
       document.getElementById("modalDireccion")
-    );
-    modal.show();
+    ).show();
     return;
   }
 
   let msg = "🛒 *Pedido*\n\n";
-
   carrito.forEach(p => {
     msg += `• ${p.nombre} - ${p.cantidad}kg\n`;
   });
 
-  msg += `\n📍 Dirección:\n${direccion}`;
+  msg += `\n📍 Dirección:\n${dir}`;
   msg += `\n\n💰 Total: $${total.toFixed(2)}`;
 
   window.open(
     `https://wa.me/5491127461954?text=${encodeURIComponent(msg)}`
   );
 }
-function filtrar(categoria) {
-  const productosDOM = document.querySelectorAll(".producto");
-
-  productosDOM.forEach((p, i) => {
-    if (categoria === "todos") {
-      p.style.display = "block";
-      return;
-    }
-
-    if (categoria === "ofertas") {
-      const tieneOferta = productos[i].precio < productos[i].precioOriginal;
-      p.style.display = tieneOferta ? "block" : "none";
-      return;
-    }
-
-    p.style.display =
-      p.dataset.categoria === categoria ? "block" : "none";
-  });
-}
-
-
