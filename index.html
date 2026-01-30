@@ -13,7 +13,7 @@
   <h3>🛒 Pedidos Online</h3>
 </header>
 
-<nav class="navbar navbar-expand-lg bg-light sticky-top shadow-sm">
+<nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top shadow-sm">
   <div class="container">
 
     <a class="navbar-brand fw-bold" href="#">🥩 Pedidos</a>
@@ -35,24 +35,65 @@
       <!-- HAMBURGUESA -->
       <button class="navbar-toggler" type="button"
         data-bs-toggle="collapse"
-        data-bs-target="#menuNav">
+        data-bs-target="#menuNav"
+        aria-controls="menuNav"
+        aria-expanded="false"
+        aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
     </div>
 
+    <!-- MENÚ -->
     <div class="collapse navbar-collapse" id="menuNav">
       <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
-        <li class="nav-item"><a class="nav-link" onclick="filtrar('todos')">Todos</a></li>
-        <li class="nav-item"><a class="nav-link text-danger fw-bold" onclick="filtrar('ofertas')">🔥 Ofertas</a></li>
-        <li class="nav-item"><a class="nav-link" onclick="filtrar('carnes')">Carnes</a></li>
-        <li class="nav-item"><a class="nav-link" onclick="filtrar('cerdo')">Cerdo</a></li>
-        <li class="nav-item"><a class="nav-link" onclick="filtrar('pollo')">Pollo</a></li>
-        <li class="nav-item"><a class="nav-link" onclick="filtrar('achuras')">Achuras</a></li>
-        <li class="nav-item"><a class="nav-link" onclick="filtrar('congelados')">Congelados</a></li>
+
+        <li class="nav-item">
+          <a href="#" class="nav-link" onclick="filtrar('todos'); cerrarMenuMobile(); return false;">
+            Todos
+          </a>
+        </li>
+
+        <li class="nav-item">
+          <a href="#" class="nav-link text-danger fw-bold" onclick="filtrar('ofertas'); cerrarMenuMobile(); return false;">
+            🔥 Ofertas
+          </a>
+        </li>
+
+        <li class="nav-item">
+          <a href="#" class="nav-link" onclick="filtrar('carnes'); cerrarMenuMobile(); return false;">
+            Carnes
+          </a>
+        </li>
+
+        <li class="nav-item">
+          <a href="#" class="nav-link" onclick="filtrar('cerdo'); cerrarMenuMobile(); return false;">
+            Cerdo
+          </a>
+        </li>
+
+        <li class="nav-item">
+          <a href="#" class="nav-link" onclick="filtrar('pollo'); cerrarMenuMobile(); return false;">
+            Pollo
+          </a>
+        </li>
+
+        <li class="nav-item">
+          <a href="#" class="nav-link" onclick="filtrar('achuras'); cerrarMenuMobile(); return false;">
+            Achuras
+          </a>
+        </li>
+
+        <li class="nav-item">
+          <a href="#" class="nav-link" onclick="filtrar('congelados'); cerrarMenuMobile(); return false;">
+            Congelados
+          </a>
+        </li>
+
       </ul>
     </div>
   </div>
 </nav>
+
 
 <div class="container my-3">
   <div id="productos" class="row g-3"></div>
@@ -154,3 +195,4 @@
 <script src="script.js"></script>
 </body>
 </html>
+

@@ -59,6 +59,27 @@ fetch(URL_SHEETS)
       });
     }
   });
+// ========================
+// FILTROS
+// ========================
+function filtrar(categoria) {
+  const productos = document.querySelectorAll(".producto");
+
+  productos.forEach(p => {
+    const cat = p.dataset.categoria;
+    const esOferta = p.dataset.oferta === "true";
+
+    if (
+      categoria === "todos" ||
+      (categoria === "ofertas" && esOferta) ||
+      cat === categoria
+    ) {
+      p.style.display = "block";
+    } else {
+      p.style.display = "none";
+    }
+  });
+}
 
 // ========================
 // CANTIDAD
@@ -141,6 +162,20 @@ function vaciarCarrito() {
 // ========================
 // WHATSAPP
 // ========================
+function obtenerNumeroPedido() {
+  let numero = localStorage.getItem("numeroPedido");
+
+  if (!numero) {
+    numero = 1;
+  } else {
+    numero = parseInt(numero) + 1;
+  }
+
+  localStorage.setItem("numeroPedido", numero);
+  return numero;
+}
+
+
 function enviarPedidoWhatsApp() {
   if (!carrito.length) return;
 
@@ -149,14 +184,12 @@ function enviarPedidoWhatsApp() {
 
   let direccion = "";
 
-  // Prioridad: si el modal está visible → usar ese input
   if (inputModal && inputModal.offsetParent !== null) {
     direccion = inputModal.value.trim();
   } else if (inputDesktop) {
     direccion = inputDesktop.value.trim();
   }
 
-  // 🚨 VALIDACIÓN REAL
   if (!direccion) {
     new bootstrap.Modal(
       document.getElementById("modalDireccion")
@@ -164,17 +197,36 @@ function enviarPedidoWhatsApp() {
     return;
   }
 
-  let msg = "🛒 *Pedido*\n\n";
+  const pedidoNro = obtenerNumeroPedido();
+  const totalTexto = total.toFixed(2);
+  const alias = "walter30mp";
+
+  // ✅ LINK CORRECTO
+  const linkPago = `https://www.mercadopago.com.ar/home?alias=${alias}`
+    "_blank";
+
+  let msg = `🧾 *PEDIDO #${pedidoNro}*\n\n`; 
+  msg += `📦 *Detalle del pedido:*\n`;
+
   carrito.forEach(p => {
-    msg += `• ${p.nombre} - ${p.cantidad}kg\n`;
+    msg += `• ${p.nombre} – ${p.cantidad}kg\n`;
   });
 
-  msg += `\n📍 Dirección:\n${direccion}`;
-  msg += `\n💰 Total: $${total.toFixed(2)}`;
+  msg += `\n📍 *Dirección:*\n${direccion}`;
+  msg += `\n\n💰 *Total a pagar:* $${totalTexto}`;
+  msg += `\n\n💳 *Pagá con Mercado Pago desde este link:*`;
+  msg += `\n👉 ${linkPago}`;
+  msg += `\n\n📲 Luego enviá el comprobante por este chat.`;
+  msg += `\n\n¡Gracias por tu compra! 🙌`;
 
-  window.open(
-    `https://wa.me/5491127461954?text=${encodeURIComponent(msg)}`
-  );
+  const telefono = "5491127461954";
+  const url = `https://wa.me/${telefono}?text=${encodeURIComponent(msg)}`;
+
+  window.open(url, "_blank");
+}
+
+function generarNumeroPedido() {
+  return Math.floor(1000 + Math.random() * 9000);
 }
 
 
@@ -231,3 +283,17 @@ function pagarMP() {
       );
       if (modal) modal.hide();
 }
+
+
+      const contador = document.getElementById("contadorCarrito");
+      if (contador) contador.style.display = "none";
+
+      document.getElementById("direccion").value = "";
+      const dirModal = document.getElementById("direccionModal");
+      if (dirModal) dirModal.value = "";
+
+      const modal = bootstrap.Modal.getInstance(
+        document.getElementById("modalCarrito")
+      );
+      if (modal) modal.hide();
+
