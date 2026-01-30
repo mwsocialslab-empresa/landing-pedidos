@@ -1,3 +1,4 @@
+
 const URL_SHEETS = "https://script.google.com/macros/s/AKfycbwb9EhIdBKP2Jqoo1BnYF35cUg304CzvLQzpS0BG1tCqFJ8fCowHLyfgMk_QWZb0jg9Sg/exec";
 
 let carrito = [];
@@ -10,13 +11,11 @@ let total = 0;
 fetch(URL_SHEETS)
   .then(r => r.json())
   .then(data => {
-
     const contenedor = document.getElementById("productos");
     let index = 0;
 
     for (const categoria in data) {
       data[categoria].forEach(p => {
-
         const esOferta = categoria === "ofertas";
         const precioOriginal = Number(p.precio);
         const precioFinal = p.oferta > 0 ? Number(p.oferta) : precioOriginal;
@@ -24,64 +23,32 @@ fetch(URL_SHEETS)
         productos.push({
           nombre: p.nombre,
           precio: precioFinal,
-          precioOriginal,
-          unidad: p.unidad,
-          esOferta
+          unidad: p.unidad
         });
 
         contenedor.innerHTML += `
           <div class="col-12 col-md-4 col-lg-3 producto"
                data-categoria="${categoria}"
                data-oferta="${esOferta}">
-            <div class="card h-100 shadow-sm text-center position-relative">
-            ${p.imagen ? `
-                  <img 
-                    src="${p.imagen}"
-                    class="card-img-top"
-                    style="height:180px; object-fit:cover;"
-                    alt="${p.nombre}"
-                  >
-                ` : ""}
-              ${esOferta ? `
-                <span class="badge bg-danger position-absolute top-0 end-0 m-2">
-                  OFERTA
-                </span>` : ""}
-
+            <div class="card h-100 shadow-sm text-center">
+              ${p.imagen ? `<img src="${p.imagen}" class="card-img-top" style="height:180px;object-fit:cover">` : ""}
               <div class="card-body">
-
                 <h5>${p.nombre}</h5>
 
-                ${
-                  esOferta
-                    ? `<p class="mb-1">
-                        <span class="text-muted text-decoration-line-through">$${precioOriginal}</span>
-                        <span class="text-danger fw-bold fs-5 ms-2">$${precioFinal}</span>
-                      </p>`
-                    : `<p class="fw-bold text-success">$${precioFinal}</p>`
+                ${esOferta
+                  ? `<p><del>$${precioOriginal}</del> <b class="text-danger">$${precioFinal}</b></p>`
+                  : `<p class="fw-bold">$${precioFinal}</p>`
                 }
 
-                <small class="text-muted">x ${p.unidad}</small>
-
-                <div class="input-group my-2">
-                  <button class="btn btn-outline-secondary"
-                    onclick="cambiarCantidad(${index}, -0.5)">−</button>
-
-                  <input type="number"
-                    class="form-control text-center"
-                    id="cant${index}"
-                    value="0"
-                    readonly>
-
-                  <span class="input-group-text">kg</span>
-
-                  <button class="btn btn-outline-secondary"
-                    onclick="cambiarCantidad(${index}, 0.5)">+</button>
+                <div class="input-group mb-2">
+                  <button class="btn btn-outline-secondary" onclick="cambiarCantidad(${index}, -0.5)">−</button>
+                  <input id="cant${index}" class="form-control text-center" value="0" readonly>
+                  <button class="btn btn-outline-secondary" onclick="cambiarCantidad(${index}, 0.5)">+</button>
                 </div>
 
                 <p>Subtotal: $<span id="sub${index}">0</span></p>
 
-                <button class="btn btn-success w-100"
-                  onclick="agregar(${index})">
+                <button class="btn btn-success w-100" onclick="agregar(${index})">
                   Agregar
                 </button>
               </div>
@@ -96,13 +63,11 @@ fetch(URL_SHEETS)
 // ========================
 // CANTIDAD
 // ========================
-function cambiarCantidad(i, valor) {
+function cambiarCantidad(i, v) {
   const input = document.getElementById(`cant${i}`);
   let cant = parseFloat(input.value) || 0;
-
-  cant += valor;
+  cant += v;
   if (cant < 0) cant = 0;
-
   input.value = cant.toFixed(1);
   document.getElementById(`sub${i}`).innerText =
     (cant * productos[i].precio).toFixed(2);
@@ -112,71 +77,56 @@ function cambiarCantidad(i, valor) {
 // CARRITO
 // ========================
 function agregar(i) {
-  const input = document.getElementById(`cant${i}`);
-  const cant = parseFloat(input.value);
-  if (!cant || cant <= 0) return;
+  const cant = parseFloat(document.getElementById(`cant${i}`).value);
+  if (!cant) return;
 
   const prod = productos[i];
   const existe = carrito.find(p => p.nombre === prod.nombre);
 
-  if (existe) {
-    existe.cantidad += cant;
-  } else {
-    carrito.push({
-      nombre: prod.nombre,
-      precio: prod.precio,
-      cantidad: cant
-    });
-  }
+  if (existe) existe.cantidad += cant;
+  else carrito.push({ ...prod, cantidad: cant });
 
-  input.value = 0;
+  document.getElementById(`cant${i}`).value = 0;
   document.getElementById(`sub${i}`).innerText = "0";
+
   actualizarCarrito();
 }
 
 function actualizarCarrito() {
   const lista = document.getElementById("lista");
-  const btnVaciar = document.getElementById("btnVaciar");
+  const listaModal = document.getElementById("listaModal");
+  const totalSpan = document.getElementById("total");
+  const totalModal = document.getElementById("totalModal");
+  const contador = document.getElementById("contadorCarrito");
 
   lista.innerHTML = "";
+  listaModal.innerHTML = "";
   total = 0;
 
   carrito.forEach((p, i) => {
     const sub = p.precio * p.cantidad;
     total += sub;
 
-    lista.innerHTML += `
-      <div class="d-flex justify-content-between mb-2">
+    const html = `
+      <div class="d-flex justify-content-between align-items-center mb-2">
         <span>${p.cantidad}kg ${p.nombre}</span>
         <span>$${sub.toFixed(2)}</span>
         <button class="btn btn-sm btn-danger" onclick="eliminar(${i})">✕</button>
       </div>
     `;
+
+    lista.innerHTML += html;
+    listaModal.innerHTML += html;
   });
 
-  document.getElementById("total").innerText = total.toFixed(2);
-  btnVaciar.style.display = carrito.length ? "block" : "none";
-    actualizarContadorCarrito();
+  totalSpan.innerText = total.toFixed(2);
+  totalModal.innerText = total.toFixed(2);
 
-}
-function actualizarContadorCarrito() {
-  const contador = document.getElementById("contadorCarrito");
-  if (!contador) return;
-
-  if (carrito.length > 0) {
-    contador.style.display = "inline-block";
+  if (contador) {
+    contador.style.display = carrito.length ? "inline-block" : "none";
     contador.innerText = carrito.length;
-  } else {
-    contador.style.display = "none";
   }
 }
-
-function irAlCarrito() {
-  document.getElementById("lista")
-    .scrollIntoView({ behavior: "smooth" });
-}
-
-
 
 function eliminar(i) {
   carrito.splice(i, 1);
@@ -189,29 +139,25 @@ function vaciarCarrito() {
 }
 
 // ========================
-// FILTRO
-// ========================
-function filtrar(cat) {
-  document.querySelectorAll(".producto").forEach(p => {
-    if (cat === "todos") {
-      p.style.display = "block";
-    } else if (cat === "ofertas") {
-      p.style.display = p.dataset.oferta === "true" ? "block" : "none";
-    } else {
-      p.style.display =
-        p.dataset.categoria === cat ? "block" : "none";
-    }
-  });
-}
-
-// ========================
 // WHATSAPP
 // ========================
 function enviarPedidoWhatsApp() {
   if (!carrito.length) return;
 
-  const dir = document.getElementById("direccion").value.trim();
-  if (!dir) {
+  const inputDesktop = document.getElementById("direccion");
+  const inputModal = document.getElementById("direccionModal");
+
+  let direccion = "";
+
+  // Prioridad: si el modal está visible → usar ese input
+  if (inputModal && inputModal.offsetParent !== null) {
+    direccion = inputModal.value.trim();
+  } else if (inputDesktop) {
+    direccion = inputDesktop.value.trim();
+  }
+
+  // 🚨 VALIDACIÓN REAL
+  if (!direccion) {
     new bootstrap.Modal(
       document.getElementById("modalDireccion")
     ).show();
@@ -223,40 +169,67 @@ function enviarPedidoWhatsApp() {
     msg += `• ${p.nombre} - ${p.cantidad}kg\n`;
   });
 
-  msg += `\n📍 Dirección:\n${dir}`;
-  msg += `\n\n💰 Total: $${total.toFixed(2)}`;
+  msg += `\n📍 Dirección:\n${direccion}`;
+  msg += `\n💰 Total: $${total.toFixed(2)}`;
 
   window.open(
     `https://wa.me/5491127461954?text=${encodeURIComponent(msg)}`
   );
 }
+
+
+
 // ========================
 // MERCADO PAGO
 // ========================
 function pagarMP() {
+  if (!carrito.length) return;
+
   const totalTexto = total.toFixed(2);
-
   const alias = "walter30mp";
-
-  const link = `https://www.mercadopago.com.ar/home?alias=${alias}`;
 
   alert(
     "Se abrirá Mercado Pago.\n\n" +
     "👉 Alias: " + alias + "\n" +
-    "💰 Total a pagar: $" + totalTexto + "\n\n" +
-    "Pegá el monto manualmente."
+    "💰 Total a pagar: $" + totalTexto
   );
 
-  window.open(link, "_blank");
+  // Abrir Mercado Pago
+  window.open(
+    `https://www.mercadopago.com.ar/home?alias=${alias}`,
+    "_blank"
+  );
+
+  // 🧹 LIMPIAR TODO EL CARRITO
+  carrito = [];
+  total = 0;
+
+  // Limpiar listas
+  const lista = document.getElementById("lista");
+  const listaModal = document.getElementById("listaModal");
+
+  if (lista) lista.innerHTML = "";
+  if (listaModal) listaModal.innerHTML = "";
+
+  // Reset totales
+  document.getElementById("total").innerText = "0";
+  const totalModal = document.getElementById("totalModal");
+  if (totalModal) totalModal.innerText = "0";
+
+  // Ocultar contador
+  const contador = document.getElementById("contadorCarrito");
+  if (contador) contador.style.display = "none";
+
+  // Limpiar inputs
+  document.querySelectorAll("input[type='number']").forEach(i => i.value = 0);
+  document.getElementById("direccion").value = "";
+  const dirModal = document.getElementById("direccionModal");
+  if (dirModal) dirModal.value = "";
+
+  // Cerrar modal si está abierto
+  const modal = bootstrap.Modal.getInstance(
+    document.getElementById("modalCarrito")
+  );
+  if (modal) modal.hide();
 }
-// navbar collapse on link click (mobile)
-  document.querySelectorAll('.navbar-nav .nav-link')
-    .forEach(link => {
-      link.addEventListener('click', () => {
-        const navbar = document.querySelector('.navbar-collapse');
-        const bsCollapse = new bootstrap.Collapse(navbar, {
-          toggle: false
-        });
-        bsCollapse.hide();
-      });
-    });
+
