@@ -185,51 +185,49 @@ function enviarPedidoWhatsApp() {
 function pagarMP() {
   if (!carrito.length) return;
 
-  const totalTexto = total.toFixed(2);
-  const alias = "walter30mp";
+      const totalTexto = total.toFixed(2);
+      const alias = "walter30mp";
 
-  alert(
-    "Se abrirá Mercado Pago.\n\n" +
-    "👉 Alias: " + alias + "\n" +
-    "💰 Total a pagar: $" + totalTexto
-  );
+      // 🔗 Link real de Mercado Pago con monto
+      const linkPago = `https://link.mercadopago.com.ar/${alias}?amount=${totalTexto}`;
 
-  // Abrir Mercado Pago
-  window.open(
-    `https://www.mercadopago.com.ar/home?alias=${alias}`,
-    "_blank"
-  );
+      // 🧾 Mensaje final para el cliente
+      const mensaje = `
+    ✅ Pedido recibido correctamente
 
-  // 🧹 LIMPIAR TODO EL CARRITO
-  carrito = [];
-  total = 0;
+    📦 En breve vamos a preparar tu pedido.
+    💳 Para finalizar la compra, realizá el pago desde el siguiente link:
+    👉 ${linkPago}
 
-  // Limpiar listas
-  const lista = document.getElementById("lista");
-  const listaModal = document.getElementById("listaModal");
+    📲 Una vez realizado el pago, enviá el comprobante por este mismo chat.
+    `;
 
-  if (lista) lista.innerHTML = "";
-  if (listaModal) listaModal.innerHTML = "";
+      // 👉 Abrir Mercado Pago
+      window.open(linkPago, "_blank");
 
-  // Reset totales
-  document.getElementById("total").innerText = "0";
-  const totalModal = document.getElementById("totalModal");
-  if (totalModal) totalModal.innerText = "0";
+      // 👉 Mostrar mensaje al cliente
+      alert(mensaje);
 
-  // Ocultar contador
-  const contador = document.getElementById("contadorCarrito");
-  if (contador) contador.style.display = "none";
+      // 🧹 Limpiar carrito
+      carrito = [];
+      total = 0;
 
-  // Limpiar inputs
-  document.querySelectorAll("input[type='number']").forEach(i => i.value = 0);
-  document.getElementById("direccion").value = "";
-  const dirModal = document.getElementById("direccionModal");
-  if (dirModal) dirModal.value = "";
+      document.getElementById("lista").innerHTML = "";
+      document.getElementById("listaModal").innerHTML = "";
+      document.getElementById("total").innerText = "0";
 
-  // Cerrar modal si está abierto
-  const modal = bootstrap.Modal.getInstance(
-    document.getElementById("modalCarrito")
-  );
-  if (modal) modal.hide();
+      const totalModal = document.getElementById("totalModal");
+      if (totalModal) totalModal.innerText = "0";
+
+      const contador = document.getElementById("contadorCarrito");
+      if (contador) contador.style.display = "none";
+
+      document.getElementById("direccion").value = "";
+      const dirModal = document.getElementById("direccionModal");
+      if (dirModal) dirModal.value = "";
+
+      const modal = bootstrap.Modal.getInstance(
+        document.getElementById("modalCarrito")
+      );
+      if (modal) modal.hide();
 }
-
