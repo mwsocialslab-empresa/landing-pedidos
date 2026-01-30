@@ -156,7 +156,27 @@ function actualizarCarrito() {
 
   document.getElementById("total").innerText = total.toFixed(2);
   btnVaciar.style.display = carrito.length ? "block" : "none";
+    actualizarContadorCarrito();
+
 }
+function actualizarContadorCarrito() {
+  const contador = document.getElementById("contadorCarrito");
+  if (!contador) return;
+
+  if (carrito.length > 0) {
+    contador.style.display = "inline-block";
+    contador.innerText = carrito.length;
+  } else {
+    contador.style.display = "none";
+  }
+}
+
+function irAlCarrito() {
+  document.getElementById("lista")
+    .scrollIntoView({ behavior: "smooth" });
+}
+
+
 
 function eliminar(i) {
   carrito.splice(i, 1);
@@ -229,3 +249,14 @@ function pagarMP() {
 
   window.open(link, "_blank");
 }
+// navbar collapse on link click (mobile)
+  document.querySelectorAll('.navbar-nav .nav-link')
+    .forEach(link => {
+      link.addEventListener('click', () => {
+        const navbar = document.querySelector('.navbar-collapse');
+        const bsCollapse = new bootstrap.Collapse(navbar, {
+          toggle: false
+        });
+        bsCollapse.hide();
+      });
+    });

@@ -12,15 +12,36 @@
 <header class="bg-success text-white text-center py-3">
   <h3>🛒 Pedidos Online</h3>
 </header>
+
 <nav class="navbar navbar-expand-lg bg-light sticky-top shadow-sm">
   <div class="container">
 
     <a class="navbar-brand fw-bold" href="#">🥩 Pedidos</a>
 
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-      data-bs-target="#menuNav">
-      <span class="navbar-toggler-icon"></span>
-    </button>
+    <!-- CARRITO + HAMBURGUESA -->
+    <div class="d-flex align-items-center gap-2">
+
+      <!-- Carrito móvil -->
+      <button id="btnCarritoMobile"
+        class="btn position-relative d-lg-none"
+        onclick="irAlCarrito()"
+        style="border:none; background:transparent; font-size:1.4rem;">
+        🛒
+        <span id="contadorCarrito"
+          class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+          style="display:none;">
+          0
+        </span>
+      </button>
+
+      <!-- Menú -->
+      <button class="navbar-toggler" type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#menuNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+    </div>
 
     <div class="collapse navbar-collapse" id="menuNav">
       <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
@@ -55,21 +76,14 @@
           <a class="nav-link" href="#" onclick="filtrar('congelados')">Congelados</a>
         </li>
 
-        <li class="nav-item">
-          <a class="nav-link" href="#contacto">Contacto</a>
-        </li>
-
-      
-
       </ul>
     </div>
+
   </div>
 </nav>
 
-
 <div class="container my-3">
 
-  <!-- PRODUCTOS -->
   <div id="productos" class="row g-3"></div>
 
   <!-- CARRITO -->
@@ -89,62 +103,45 @@
         onclick="vaciarCarrito()">
         🗑 Vaciar carrito
       </button>
-      <div class="mb-2">
-    <label class="form-label">📍 Dirección de entrega</label>
-    <input
-        type="text"
-        id="direccion"
-        class="form-control"
-        placeholder="Ej: Av. San Martín 1234"
-      >
-    </div>
 
+      <div class="mb-2">
+        <label class="form-label">📍 Dirección de entrega</label>
+        <input type="text" id="direccion" class="form-control"
+          placeholder="Ej: Av. San Martín 1234">
+      </div>
 
       <button class="btn btn-success w-100 my-2" onclick="enviarPedidoWhatsApp()">
         📲 Enviar por WhatsApp
       </button>
+
       <button class="btn btn-primary w-100" onclick="pagarMP()">
         💳 Pagar con Mercado Pago
       </button>
 
-
-
     </div>
   </div>
-
 </div>
-<!-- MODAL DIRECCIÓN OBLIGATORIA -->
+
+<!-- MODAL -->
 <div class="modal fade" id="modalDireccion" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
-
-      <div class="modal-header bg-warning text-dark">
+      <div class="modal-header bg-warning">
         <h5 class="modal-title">📍 Dirección requerida</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        <button class="btn-close" data-bs-dismiss="modal"></button>
       </div>
-
       <div class="modal-body text-center">
-        <p class="fs-5">
-          Para continuar con el pedido necesitás ingresar la dirección de entrega.
-        </p>
-        <p class="text-muted mb-0">Ej: Av. San Martín 1234</p>
+        <p>Ingresá tu dirección para continuar</p>
       </div>
-
       <div class="modal-footer">
-        <button class="btn btn-secondary" data-bs-dismiss="modal">
-          OK, entiendo
-        </button>
-        
+        <button class="btn btn-secondary" data-bs-dismiss="modal">OK</button>
       </div>
-
     </div>
   </div>
 </div>
 
-
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
 <script src="script.js"></script>
+
 </body>
 </html>
