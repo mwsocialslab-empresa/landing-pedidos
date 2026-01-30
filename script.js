@@ -34,7 +34,14 @@ fetch(URL_SHEETS)
                data-categoria="${categoria}"
                data-oferta="${esOferta}">
             <div class="card h-100 shadow-sm text-center position-relative">
-
+            ${p.imagen ? `
+                  <img 
+                    src="${p.imagen}"
+                    class="card-img-top"
+                    style="height:180px; object-fit:cover;"
+                    alt="${p.nombre}"
+                  >
+                ` : ""}
               ${esOferta ? `
                 <span class="badge bg-danger position-absolute top-0 end-0 m-2">
                   OFERTA
