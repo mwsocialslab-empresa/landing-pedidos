@@ -17,3 +17,38 @@
   font-size: 13px;
   padding: 4px;
 }
+/* =========================
+   AJUSTES MOBILE
+========================= */
+@media (max-width: 576px) {
+
+  .card {
+    font-size: 0.9rem;
+  }
+
+  .card h5 {
+    font-size: 1rem;
+    margin-bottom: 4px;
+  }
+
+  .card-img-top {
+    height: 110px !important;
+  }
+
+  .btn {
+    font-size: 0.85rem;
+    padding: 6px 10px;
+  }
+
+  .input-group input {
+    font-size: 0.85rem;
+  }
+
+  .input-group .btn {
+    padding: 4px 8px;
+  }
+
+  .card-body {
+    padding: 0.75rem;
+  }
+}
